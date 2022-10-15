@@ -1,0 +1,10 @@
+# 使用前复制该文件把后缀.bak去掉放在本目录下
+
+# 关于sqlite注意事项
+#   在使用前需创建好相应的数据库和目录，以及配置数据库时区
+prod:
+  sql_url: sqlite:///C:\pixiv_data.sql?_loc=Asia/Shanghai
+  file_path: ./pixiv_data
+  session_id: 11451478_abcdefghijklmnopqrstuvwxyzABCDEF
+  proxy: 127.0.0.1:10809
+  timezone: Asia/Shanghai

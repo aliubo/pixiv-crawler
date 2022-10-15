@@ -1,0 +1,34 @@
+prod:
+  sql_url: postgresql://postgres:114514@localhost:5432/pixiv_crawler
+  file_path: C:\pixiv_data
+  session_id: 114514_abcdefghijklmnopqrstuvwxyzABCDEF
+  proxy: 127.0.0.1:10809
+  timezone: Asia/Shanghai
+
+# 关于postgresql注意事项
+#   在使用前需创建好相应的数据库和目录，以及配置数据库时区
+#   用户级配置时区 alter role <username> set timezone=‘UTC’;
+#   数据库级配置   alter database <dbname> set timezone=‘UTC’;
+#   全局配置 打开 postgresql.conf 设置 log_timezone 和 timezone
+test_postgresql:
+  sql_url: postgresql://postgres:password@localhost:5432/pixiv_crawler_test
+  file_path: C:\pixiv_data_test
+  session_id: 114514_abcdefghijklmnopqrstuvwxyzABCDEF
+  proxy: 127.0.0.1:10809
+  timezone: Asia/Shanghai
+
+test_mysql:
+  sql_url: mysql+mysqlconnector://root:114514@localhost:3306/pixiv_crawler_test
+  file_path: C:\pixiv_data_test
+  session_id: 114514_abcdefghijklmnopqrstuvwxyzABCDEF
+  proxy: 127.0.0.1:10809
+  timezone: Asia/Shanghai
+
+# 关于sqlite注意事项
+#   在使用前需创建好相应的数据库和目录，以及配置数据库时区
+test_sqlite:
+  sql_url: sqlite:///C:\pixiv_sqlite\a.sql?_loc=Asia/Shanghai
+  file_path: C:\pixiv_data_test
+  session_id: 114514_abcdefghijklmnopqrstuvwxyzABCDEF
+  proxy: 127.0.0.1:10809
+  timezone: Asia/Shanghai
