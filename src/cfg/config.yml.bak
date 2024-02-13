@@ -1,4 +1,0 @@
-sql_url: postgresql://postgres:password@localhost:5432/pixiv
-file_path: ../file
-session_id: 1145141919810_kfcfkxq4vw50
-proxy: 127.0.0.1:7890
