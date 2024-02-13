@@ -4,5 +4,6 @@ __pycache__
 
 /srcold
 /file
-/src/cfg/config.yml
-/src/cfg/config.yml.bak
+
+/src/cfg/*
+!/src/cfg/config.yml.example

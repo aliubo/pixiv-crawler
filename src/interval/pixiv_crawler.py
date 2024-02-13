@@ -1,18 +1,19 @@
 import pkg.log as log
 import pkg.pixivapi as pixiv_api
 import pkg.pixivmodel as model
+import pkg.cfg as cfg
 import yaml
 from pathlib import Path
 
-CONFIG = yaml.load(open('cfg/config.yml', 'r'), yaml.CLoader)
-FILE_PATH = Path(CONFIG['file_path'])
+
+config = cfg.get_pixiv_config()
 
 
 api = pixiv_api.new_pixiv_api(pixiv_api.ApiMetaArgument(
-    PHPSESSID=CONFIG['session_id'],
-    PROXY=CONFIG['proxy']
+    PHPSESSID=config.phpsessid,
+    PROXY=config.proxy
 ))
-sql = model.new_session(CONFIG['sql_url'])
+sql = model.new_session(config.sql_url)
 
 
 def _new_artwork(
@@ -41,7 +42,7 @@ def _new_artwork(
 
 
 def _get_filepath(artwork_id: int, idx: int) -> Path:
-    return FILE_PATH / f"{artwork_id}_{idx}.jpg"
+    return config.file_path / f"{artwork_id}_{idx}.jpg"
 
 
 def _download_artwork(artwork_info: pixiv_api.ArtworkInfo) -> int:
