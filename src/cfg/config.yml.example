@@ -1,3 +1,5 @@
+目前测试以下三种环境没问题，选择其中之一然后复制粘贴到config.yaml中即可
+
 sql_url: postgresql://postgres:password@localhost:5432/pixiv
 file_path: ../file
 session_id: 1145141919810_kfcfkxq4vw50
@@ -8,7 +10,7 @@ file_path: ../file
 session_id: 1145141919810_kfcfkxq4vw50
 proxy: 127.0.0.1:7890
 
-sql_url: sqlite:///./pixiv.db
+sql_url: sqlite:///../pixiv.db
 file_path: ../file
 session_id: 1145141919810_kfcfkxq4vw50
 proxy: 127.0.0.1:7890
