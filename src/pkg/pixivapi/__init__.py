@@ -69,7 +69,7 @@ class PixivisionInfo(NamedTuple):
     title: str
     desc: str
     pixivision_type: str
-    artworks: list[ArtworkInfo]
+    artworks: dict[int, ArtworkInfo]
 
 
 class ArtworkOptions(object):
@@ -106,11 +106,11 @@ class PixivApi(object):
         # 获取某个插画的详细信息
         raise NotImplementedError
 
-    def get_artworks_by_userid(self, user_id: int, options: ArtworkOptions) -> list[ArtworkInfo]:
+    def get_artworks_by_userid(self, user_id: int, options: ArtworkOptions) -> dict[int, ArtworkInfo]:
         # 根据用户id获取所有插画作品
         raise NotImplementedError
 
-    def get_artworks_by_bookmark_new(self, page: int, options: ArtworkOptions) -> list[ArtworkInfo]:
+    def get_artworks_by_bookmark_new(self, page: int, options: ArtworkOptions) -> dict[int, ArtworkInfo]:
         # 获取关注的用户最新的插画作品
         raise NotImplementedError
 
@@ -118,16 +118,16 @@ class PixivApi(object):
         # 获取pixivision的插画作品，根据aid
         raise NotImplementedError
 
-    def get_artworks_by_recommend(self, options: ArtworkOptions) -> list[ArtworkInfo]:
+    def get_artworks_by_recommend(self, options: ArtworkOptions) -> dict[int, ArtworkInfo]:
         # 获取推荐的插画作品(首页的推荐作品)
         raise NotImplementedError
 
-    def get_artworks_by_rank(self, rank_type: RankType, date: int, options: ArtworkOptions) -> list[ArtworkInfo]:
+    def get_artworks_by_rank(self, rank_type: RankType, date: int, options: ArtworkOptions) -> dict[int, ArtworkInfo]:
         # 根据排行榜获取插画作品
         # date: 8位数字，如20220101
         raise NotImplementedError
 
-    def get_artworks_by_request_recommend(self, options: ArtworkOptions) -> list[ArtworkInfo]:
+    def get_artworks_by_request_recommend(self, options: ArtworkOptions) -> dict[int, ArtworkInfo]:
         # 获取推荐的接稿的插画作品(接稿页面的推荐作品)
         raise NotImplementedError
 
@@ -139,11 +139,11 @@ class PixivApi(object):
         # 获取相似用户的用户id(当关注一个用户时，pixiv给的推荐用户)
         raise NotImplementedError
 
-    def get_artworks_by_user_bookmark(self, user_id: int, page: int, options: ArtworkOptions) -> list[ArtworkInfo]:
+    def get_artworks_by_user_bookmark(self, user_id: int, page: int, options: ArtworkOptions) -> dict[int, ArtworkInfo]:
         # 获取用户的收藏作品
         raise NotImplementedError
 
-    def get_artworks_by_tag_popular(self, tag_name: str, options: ArtworkOptions) -> list[ArtworkInfo]:
+    def get_artworks_by_tag_popular(self, tag_name: str, options: ArtworkOptions) -> dict[int, ArtworkInfo]:
         # 从指定tag获取热门作品
         raise NotImplementedError
 
@@ -151,7 +151,7 @@ class PixivApi(object):
         # 获取推荐的用户id（首页展示的）
         raise NotImplementedError
 
-    def get_artworks_by_similar_artwork(self, artwork_id: int, options: ArtworkOptions) -> list[ArtworkInfo]:
+    def get_artworks_by_similar_artwork(self, artwork_id: int, options: ArtworkOptions) -> dict[int, ArtworkInfo]:
         # 获取相似作品（作品底部展示的，以及收藏时浮出的）
         raise NotImplementedError
 

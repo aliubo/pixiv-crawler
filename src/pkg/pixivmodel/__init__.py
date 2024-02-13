@@ -125,5 +125,6 @@ class Artwork(Base):
 
 def new_session(session_url: str):
     sql_engine = create_engine(session_url)
+    Base.metadata.create_all(sql_engine)
     return sessionmaker(sql_engine)
     

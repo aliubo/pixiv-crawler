@@ -3,7 +3,6 @@ import pkg.pixivapi as pixiv_api
 import pkg.pixivmodel as model
 import yaml
 from pathlib import Path
-import typing
 
 CONFIG = yaml.load(open('cfg/config.yml', 'r'), yaml.CLoader)
 FILE_PATH = Path(CONFIG['file_path'])
@@ -71,7 +70,9 @@ def is_artwork_exist(artwork_id: int) -> bool:
     return True
 
 
-def _crawler_by_artwork_info(artwork_info: pixiv_api.ArtworkInfo, options: pixiv_api.ArtworkOptions | None = None):
+def _crawler_by_artwork_info(
+        artwork_info: pixiv_api.ArtworkInfo,
+        options: pixiv_api.ArtworkOptions | None = None):
     if options is None:
         options = pixiv_api.new_filter()
 
@@ -85,7 +86,7 @@ def _crawler_by_artwork_info(artwork_info: pixiv_api.ArtworkInfo, options: pixiv
             log.info(f"artwork {artwork_info.artwork_id} already exist")
             return
     # 爬取图片
-    total_filesize = _download_artwork(artwork_info)
+    total_file_size = _download_artwork(artwork_info)
     # 存数据库
     with sql() as session:
         tags = []
@@ -96,13 +97,13 @@ def _crawler_by_artwork_info(artwork_info: pixiv_api.ArtworkInfo, options: pixiv
             else:
                 tags.append(tag_record)
         user = model.User(user_id=artwork_info.user_id, user_name=artwork_info.user_name)
-        artwork = _new_artwork(artwork_info, tags, total_filesize)
+        artwork = _new_artwork(artwork_info, tags, total_file_size)
         session.merge(user)
         session.merge(artwork)  # 会自动插入不存在的tag
         session.commit()
     
 
-def crawler_by_artwork_id(artwork_id: int, options: pixiv_api.ArtworkOptions=None):
+def crawler_by_artwork_id(artwork_id: int, options: pixiv_api.ArtworkOptions | None = None):
     if options is None:
         options = pixiv_api.new_filter()
 
@@ -116,17 +117,13 @@ def crawler_by_artwork_id(artwork_id: int, options: pixiv_api.ArtworkOptions=Non
     )
 
 
-def crawler_by_user_id(user_id: int, options: pixiv_api.ArtworkOptions=None):
+def crawler_by_user_id(user_id: int, options: pixiv_api.ArtworkOptions | None = None):
     if options is None:
         options = pixiv_api.new_filter()
 
     artworks = api.get_artworks_by_userid(user_id, options)
-    log.info(
-        f"get {len(artworks)} artworks from user {user_id}",
-        artworks=[artwork_info.artwork_id for artwork_info in artworks],
-        user_id=user_id
-    )
-    for artwork_info in artworks:
+    log.info(f"get {len(artworks)} artworks from user {user_id}", artworks=artworks.keys(), user_id=user_id)
+    for artwork_info in artworks.values():
         _crawler_by_artwork_info(artwork_info, options)
         log.info(
             f"save artwork {artwork_info.artwork_id} to database",
@@ -137,18 +134,18 @@ def crawler_by_user_id(user_id: int, options: pixiv_api.ArtworkOptions=None):
     log.info(f"save {len(artworks)} artworks to database")
 
 
-def crawler_by_pixivision_aid(aid: int, options: pixiv_api.ArtworkOptions=None):
+def crawler_by_pixivision_aid(aid: int, options: pixiv_api.ArtworkOptions | None = None):
     if options is None:
         options = pixiv_api.new_filter()
 
     res = api.get_artworks_by_pixivision_aid(aid, options)
     log.info(
         f"get {len(res.artworks)} artworks from pixivision {aid}",
-        artworks=[artwork_info.artwork_id for artwork_info in res.artworks],
+        artworks=res.artworks.keys(),
         title=res.title,
         type=res.pixivision_type,
     )
-    for artwork_info in res.artworks:
+    for artwork_info in res.artworks.values():
         _crawler_by_artwork_info(artwork_info, options)
         log.info(
             f"save artwork {artwork_info.artwork_id} to database",
@@ -161,7 +158,7 @@ def crawler_by_pixivision_aid(aid: int, options: pixiv_api.ArtworkOptions=None):
         title=res.title,
         type=res.pixivision_type,
         description=res.desc,
-        artworks=[model.Artwork(artwork_id=artwork_info.artwork_id) for artwork_info in res.artworks]
+        artworks=[model.Artwork(artwork_id=artwork_id) for artwork_id in res.artworks]
     )
     with sql() as session:
         session.merge(pixivision)
@@ -169,17 +166,13 @@ def crawler_by_pixivision_aid(aid: int, options: pixiv_api.ArtworkOptions=None):
     log.info(f"save pixivision {aid} to database")
 
 
-def crawler_by_bookmark_new(page: int, options: pixiv_api.ArtworkOptions=None):
+def crawler_by_bookmark_new(page: int, options: pixiv_api.ArtworkOptions | None = None):
     if options is None:
         options = pixiv_api.new_filter()
 
     artworks = api.get_artworks_by_bookmark_new(page, options)
-    log.info(
-        f"get {len(artworks)} artworks from bookmark new",
-        artworks=[artwork.artwork_id for artwork in artworks],
-        page=page
-    )
-    for artwork_info in artworks:
+    log.info(f"get {len(artworks)} artworks from bookmark new", artworks=artworks.keys(), page=page)
+    for artwork_info in artworks.values():
         _crawler_by_artwork_info(artwork_info, options)
         log.info(
             f"save artwork {artwork_info.artwork_id} to database",
@@ -190,16 +183,13 @@ def crawler_by_bookmark_new(page: int, options: pixiv_api.ArtworkOptions=None):
     log.info(f"save {len(artworks)} artworks to database")
 
 
-def crawler_by_recommend(options: pixiv_api.ArtworkOptions=None):
+def crawler_by_recommend(options: pixiv_api.ArtworkOptions | None = None):
     if options is None:
         options = pixiv_api.new_filter()
 
-    artworks: list[pixiv_api.ArtworkInfo] = api.get_artworks_by_recommend(options)
-    log.info(
-        f"get {len(artworks)} artworks from recommend",
-        artworks=[artwork_info.artwork_id for artwork_info in artworks]
-    )
-    for artwork_info in artworks:
+    artworks: dict[int, pixiv_api.ArtworkInfo] = api.get_artworks_by_recommend(options)
+    log.info(f"get {len(artworks)} artworks from recommend", artworks=artworks.keys())
+    for artwork_info in artworks.values():
         _crawler_by_artwork_info(artwork_info, options)
         log.info(
             f"save artwork {artwork_info.artwork_id} to database",
@@ -210,18 +200,13 @@ def crawler_by_recommend(options: pixiv_api.ArtworkOptions=None):
     log.info(f"save {len(artworks)} artworks to database")
 
 
-def crawler_by_rank(rank_type: pixiv_api.RankType, date: int, options: pixiv_api.ArtworkOptions=None):
+def crawler_by_rank(rank_type: pixiv_api.RankType, date: int, options: pixiv_api.ArtworkOptions | None = None):
     if options is None:
         options = pixiv_api.new_filter()
 
-    artworks: list[pixiv_api.ArtworkInfo] = api.get_artworks_by_rank(rank_type, date, options)
-    log.info(
-        f"get {len(artworks)} artworks from rank",
-        artworks=[artwork_info.artwork_id for artwork_info in artworks],
-        rank_type=rank_type.name,
-        date=date
-    )
-    for artwork_info in artworks:
+    artworks: dict[int, pixiv_api.ArtworkInfo] = api.get_artworks_by_rank(rank_type, date, options)
+    log.info(f"get {len(artworks)} artworks from rank", artworks=artworks.keys(), rank_type=rank_type.name, date=date)
+    for artwork_info in artworks.values():
         _crawler_by_artwork_info(artwork_info, options)
         log.info(
             f"save artwork {artwork_info.artwork_id} to database",
@@ -232,16 +217,13 @@ def crawler_by_rank(rank_type: pixiv_api.RankType, date: int, options: pixiv_api
     log.info(f"save {len(artworks)} artworks to database")
 
 
-def crawler_by_request_recommend(options: pixiv_api.ArtworkOptions=None):
+def crawler_by_request_recommend(options: pixiv_api.ArtworkOptions | None = None):
     if options is None:
         options = pixiv_api.new_filter()
 
-    artworks: list[pixiv_api.ArtworkInfo] = api.get_artworks_by_request_recommend(options)
-    log.info(
-        f"get {len(artworks)} artworks from request recommend",
-        artworks=[artwork_info.artwork_id for artwork_info in artworks]
-    )
-    for artwork_info in artworks:
+    artworks: dict[int, pixiv_api.ArtworkInfo] = api.get_artworks_by_request_recommend(options)
+    log.info(f"get {len(artworks)} artworks from request recommend", artworks=artworks.keys())
+    for artwork_info in artworks.values():
         _crawler_by_artwork_info(artwork_info, options)
         log.info(
             f"save artwork {artwork_info.artwork_id} to database",
@@ -252,18 +234,13 @@ def crawler_by_request_recommend(options: pixiv_api.ArtworkOptions=None):
     log.info(f"save {len(artworks)} artworks to database")
 
 
-def crawler_by_user_bookmark(user_id: int, page: int, options: pixiv_api.ArtworkOptions=None):
+def crawler_by_user_bookmark(user_id: int, page: int, options: pixiv_api.ArtworkOptions | None = None):
     if options is None:
         options = pixiv_api.new_filter()
 
-    artworks: list[pixiv_api.ArtworkInfo] = api.get_artworks_by_user_bookmark(user_id, page, options)
-    log.info(
-        f"get {len(artworks)} artworks from user bookmark",
-        artworks=[artwork_info.artwork_id for artwork_info in artworks],
-        user_id=user_id,
-        page=page
-    )
-    for artwork_info in artworks:
+    artworks: dict[int, pixiv_api.ArtworkInfo] = api.get_artworks_by_user_bookmark(user_id, page, options)
+    log.info(f"get {len(artworks)} artworks from user bookmark", artworks=artworks.keys(), user_id=user_id, page=page)
+    for artwork_info in artworks.values():
         _crawler_by_artwork_info(artwork_info, options)
         log.info(
             f"save artwork {artwork_info.artwork_id} to database",
@@ -274,17 +251,13 @@ def crawler_by_user_bookmark(user_id: int, page: int, options: pixiv_api.Artwork
     log.info(f"save {len(artworks)} artworks to database")
 
 
-def crawler_by_tag_popular(tag_name: str, options: pixiv_api.ArtworkOptions=None):
+def crawler_by_tag_popular(tag_name: str, options: pixiv_api.ArtworkOptions | None = None):
     if options is None:
         options = pixiv_api.new_filter()
 
-    artworks: list[pixiv_api.ArtworkInfo] = api.get_artworks_by_tag_popular(tag_name, options)
-    log.info(
-        f"get {len(artworks)} artworks from tag popular",
-        artworks=[artwork_info.artwork_id for artwork_info in artworks],
-        tag_name=tag_name
-    )
-    for artwork_info in artworks:
+    artworks: dict[int, pixiv_api.ArtworkInfo] = api.get_artworks_by_tag_popular(tag_name, options)
+    log.info(f"get {len(artworks)} artworks from tag popular", artworks=artworks.keys(), tag_name=tag_name)
+    for artwork_info in artworks.values():
         _crawler_by_artwork_info(artwork_info, options)
         log.info(
             f"save artwork {artwork_info.artwork_id} to database",
@@ -299,13 +272,9 @@ def crawler_by_similar_artwork(artwork_id: int, options: pixiv_api.ArtworkOption
     if options is None:
         options = pixiv_api.new_filter()
 
-    artworks: list[pixiv_api.ArtworkInfo] = api.get_artworks_by_similar_artwork(artwork_id, options)
-    log.info(
-        f"get {len(artworks)} artworks from similar artwork_info",
-        artworks=[artwork_info.artwork_id for artwork_info in artworks],
-        artwork_id=artwork_id
-    )
-    for artwork_info in artworks:
+    artworks: dict[int, pixiv_api.ArtworkInfo] = api.get_artworks_by_similar_artwork(artwork_id, options)
+    log.info(f"get {len(artworks)} artworks from similar artwork_info", artworks=artworks.keys(), artwork_id=artwork_id)
+    for artwork_info in artworks.values():
         _crawler_by_artwork_info(artwork_info, options)
         log.info(
             f"save artwork {artwork_info.artwork_id} to database",
@@ -316,44 +285,34 @@ def crawler_by_similar_artwork(artwork_id: int, options: pixiv_api.ArtworkOption
     log.info(f"save {len(artworks)} artworks to database")
 
 
-def crawler_by_similar_user(user_id: int, options: pixiv_api.ArtworkOptions=None):
+def crawler_by_similar_user(user_id: int, options: pixiv_api.ArtworkOptions | None = None):
     if options is None:
         options = pixiv_api.new_filter()
 
     userids: list[int] = api.get_userids_by_similar_user(user_id, options)
-    log.info(
-        f"get {len(userids)} similar user from user {user_id}",
-        userids=userids,
-        user_id=user_id
-    )
+    log.info(f"get {len(userids)} similar user from user {user_id}", userids=userids, user_id=user_id)
     for userid in userids:
         crawler_by_user_id(userid, options)
     log.info(f"save {len(userids)} similar user to database")
 
 
-def crawler_by_recommend_user(options: pixiv_api.ArtworkOptions=None):
+def crawler_by_recommend_user(options: pixiv_api.ArtworkOptions | None = None):
     if options is None:
         options = pixiv_api.new_filter()
 
     userids: list[int] = api.get_userids_by_recommend(options)
-    log.info(
-        f"get {len(userids)} recommend user",
-        userids=userids
-    )
+    log.info(f"get {len(userids)} recommend user", userids=userids)
     for userid in userids:
         crawler_by_user_id(userid, options)
     log.info(f"save {len(userids)} recommend user to database")
 
 
-def crawler_by_request_creater(options: pixiv_api.ArtworkOptions=None):
+def crawler_by_request_creator(options: pixiv_api.ArtworkOptions | None = None):
     if options is None:
         options = pixiv_api.new_filter()
 
     userids: list[int] = api.get_userids_by_request_creator(options)
-    log.info(
-        f"get {len(userids)} request creater",
-        userids=userids
-    )
+    log.info(f"get {len(userids)} request creator", userids=userids)
     for userid in userids:
         crawler_by_user_id(userid, options)
-    log.info(f"save {len(userids)} request creater to database")
+    log.info(f"save {len(userids)} request creator to database")
