@@ -2,8 +2,7 @@
 .idea
 __pycache__
 
-/srcold
 /file
-
 /src/cfg/*
 !/src/cfg/config.yml.example
+/db.sqlite

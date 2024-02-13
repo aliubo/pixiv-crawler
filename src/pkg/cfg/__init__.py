@@ -10,7 +10,7 @@ class PixivConfig(typing.NamedTuple):
 
 def get_pixiv_config(filename: str = "config.yml") -> PixivConfig:
     import yaml
-    filepath = pathlib.Path(__file__).parent.parent / "cfg" / filename
+    filepath = pathlib.Path(__file__).parent.parent.parent / "cfg" / filename
     with open(filepath, "r") as f:
         obj = yaml.safe_load(f)
     return PixivConfig(
