@@ -1,6 +1,7 @@
 import typing
 import pathlib
 
+
 class PixivConfig(typing.NamedTuple):
     phpsessid: str
     proxy: str
