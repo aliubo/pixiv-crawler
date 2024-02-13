@@ -185,10 +185,9 @@ class PixivApiImpl(pixivapi.PixivApi):
         artwork_ids = list(set([int(i) for i in artwork_ids]))
         return self._gen_artwork_info_dict(artwork_ids, options)
 
-    def get_artworks_by_bookmark_new(self, page: int, options: pixivapi.ArtworkOptions) -> dict[int, pixivapi.ArtworkInfo]:
-        url = f"https://www.pixiv.net/ajax/bookmark_new_illust.php?p={page}&rest=show"
-        if options.only_r18:
-            url += "&mode=r18"
+    def get_artworks_by_follow_latest(self, page: int, options: pixivapi.ArtworkOptions) -> dict[int, pixivapi.ArtworkInfo]:
+        url = f"https://www.pixiv.net/ajax/follow_latest/illust?p={page}&lang=zh"
+        url += "&mode=r18" if options.only_r18 else "&mode=all"
         res = self._session.get(url=url, headers=BASE_HEADERS).json()
         artwork_ids = res['body']['page']['ids']
         artwork_ids = list(set([int(i) for i in artwork_ids]))
@@ -203,10 +202,8 @@ class PixivApiImpl(pixivapi.PixivApi):
         res = self._session.get(url=url, headers=headers).text
 
         parsel_obj = parsel.Selector(res)
-        #title = parsel_obj.css('.am__title')[0].root.text
         title = parsel_obj.xpath('//meta[@property="og:title"]/@content').get()
         a_type = parsel_obj.css('.am__categoty-pr').css('a').attrib['data-gtm-label']
-        #description = parsel_obj.css('.am__description')[0].root.text_content()
         description = parsel_obj.xpath('//meta[@property="og:description"]/@content').get()
 
         if a_type != 'illustration':
@@ -239,13 +236,12 @@ class PixivApiImpl(pixivapi.PixivApi):
         artwork_ids = list(set((int(i) for i in artwork_ids)))
         return self._gen_artwork_info_dict(artwork_ids, options)
 
-    def get_artworks_by_rank(self, rank_type: pixivapi.RankType, date: int, options: pixivapi.ArtworkOptions) -> dict[int, pixivapi.ArtworkInfo]:
-        url = f"https://www.pixiv.net/ranking.php?&content=illust&p=1&format=json&date={date}"
-        url += f"&mode={rank_type.value}"
-        res = self._session.get(url=url, headers=BASE_HEADERS).text
+    def get_artworks_by_rank(self, rank_type: pixivapi.RankType, date: int, page: int, options: pixivapi.ArtworkOptions) -> dict[int, pixivapi.ArtworkInfo]:
+        url = f"https://www.pixiv.net/ranking.php?&content=illust&p=1&format=json"
+        url += f"&date={date}&mode={rank_type.value}"
+        res = self._session.get(url=url, headers=BASE_HEADERS).json()
 
-        parsel_obj = parsel.Selector(res)
-        artwork_ids = [i.attrib['data-id'] for i in parsel_obj.css('.ranking-items')[0].css('section')]
+        artwork_ids = [int(i['illust_id']) for i in res['contents']]
         artwork_ids = list(set((int(i) for i in artwork_ids)))
         return self._gen_artwork_info_dict(artwork_ids, options)
 
@@ -281,7 +277,7 @@ class PixivApiImpl(pixivapi.PixivApi):
         return userids
 
     def get_artworks_by_user_bookmark(self, user_id: int, page: int, options: pixivapi.ArtworkOptions) -> dict[int, pixivapi.ArtworkInfo]:
-        url = f"https://www.pixiv.net/ajax/user/{user_id}/illusts/bookmarks?tag=&offset={page*48}&limit=48&rest=show&lang=zh"
+        url = f"https://www.pixiv.net/ajax/user/{user_id}/illusts/bookmarks?tag=&offset={(page-1)*48}&limit=48&rest=show&lang=zh"
         res = self._session.get(url=url, headers=BASE_HEADERS).json()
         artwork_ids = [int(i['id']) for i in res['body']['works']]
         artwork_ids = list(set(artwork_ids))

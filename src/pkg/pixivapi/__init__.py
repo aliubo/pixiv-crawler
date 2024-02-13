@@ -80,12 +80,14 @@ class ArtworkOptions(object):
         only_non_r18: bool, 是否只爬取非R18
         skip_manga: bool, 是否跳过漫画
         artwork_types: list[ArtworkType], 只爬取指定类型的artwork
+        ignore_error: bool, 是否忽略爬取过程中的某个artwork出错，如果为False则会在出错时直接raise
         """
         self.update = False
         self.only_r18 = False
         self.only_non_r18 = False
         self.skip_manga = True
         self.artwork_types: list[ArtworkType] | None = None
+        self.ignore_error = True
 
     def valid_by_artwork_info(self, artwork_info: ArtworkInfo) -> Optional[str]:
         if self.only_r18 and artwork_info.restrict == ArtworkRestrict.NON_R18:
@@ -110,7 +112,7 @@ class PixivApi(object):
         # 根据用户id获取所有插画作品
         raise NotImplementedError
 
-    def get_artworks_by_bookmark_new(self, page: int, options: ArtworkOptions) -> dict[int, ArtworkInfo]:
+    def get_artworks_by_follow_latest(self, page: int, options: ArtworkOptions) -> dict[int, ArtworkInfo]:
         # 获取关注的用户最新的插画作品
         raise NotImplementedError
 
@@ -122,7 +124,7 @@ class PixivApi(object):
         # 获取推荐的插画作品(首页的推荐作品)
         raise NotImplementedError
 
-    def get_artworks_by_rank(self, rank_type: RankType, date: int, options: ArtworkOptions) -> dict[int, ArtworkInfo]:
+    def get_artworks_by_rank(self, rank_type: RankType, date: int, page: int, options: ArtworkOptions) -> dict[int, ArtworkInfo]:
         # 根据排行榜获取插画作品
         # date: 8位数字，如20220101
         raise NotImplementedError
