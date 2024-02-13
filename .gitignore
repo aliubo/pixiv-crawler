@@ -1,0 +1,7 @@
+.vscode
+.idea
+__pycache__
+
+/srcold
+/file
+/src/cfg/config.yml

@@ -1,7 +1,0 @@
-log:
-  # 标准输出日志等级
-  stdout_level: DEBUG
-  # 文件输出日志等级
-  file_level: INFO
-  # 文件输出文件位置
-  file_location: ../log/running.log
