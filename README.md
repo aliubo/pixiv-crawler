@@ -1,3 +1,8 @@
+# 项目已移步到新的仓库
+https://github.com/aliubo/pixivtools
+
+---
+
 # pixiv_crawler
 
 爬取pixiv网站的图片，支持多种爬取模式：  
